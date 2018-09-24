@@ -1,0 +1,78 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Untitled Document</title>
+<script src="js/jquery-1.10.2.js"></script>
+</head>
+
+<body>
+ <div class="explain">
+            <div class="title">
+                <a href="javascript:;" onclick="$('#game_detail').show();$('#all_scores').hide();">GAME</a> <a href="javascript:;" onclick="$('#game_detail').hide();$('#all_scores').show();getMessages();">SCORES</a>
+            </div>
+            <div id="con_detail">
+            <div class="game_detail" id="game_detail">
+                <span class="fl inst">
+                    <p class="tit">Instructions</p>
+                    <p class="detail">Destroy Enemy Invaders before they reach the ground.<br />Watch out for enemy fire!</p>
+                </span><span class="fl cont">
+                    <p class="tit">Controls</p>
+                    <p class="detail">A - Move Left<br />D - Move Right<br />Space Bar - Fire</p>
+                </span>
+            </div>
+            <div class="all_scores" id="all_scores">
+                
+            </div>
+            </div>
+        </div>
+        <script>
+	      var GET_MESSAGE_SERVICE = 'http://playdoh.algonquincollege.com/lts/mike/WebServices/MessageService.asmx/GetScores';
+            var SEND_MESSAGE_SERVICE = 'http://playdoh.algonquincollege.com/lts/mike/WebServices/MessageService.asmx/SendScores';
+
+
+            function getMessages() {
+                $.ajax({
+                    url: GET_MESSAGE_SERVICE,
+                    type: 'GET',
+                    dataType: 'json',
+                    contentType: "application/json; charset=utf-8",
+                    cache: false,
+                    success: onGetMessageSuccess,
+                    error: onAjaxError
+                });
+            }
+
+            function onAjaxError(jqXHR, status, errorThrown) {
+                $("#con_detail .all_scores").html(status + ": " + errorThrown + "<br><br>" + jqXHR.
+				 responseText);
+            }
+
+            function onGetMessageSuccess(data) {
+                var messageList = data.d,
+                    innerHTml = '';
+                $('#con_detail .all_scores').empty();
+                for (var i in messageList) {
+                    innerHTml += '<dl><dt> player:' + messageList[i].name + '</dt><dd>　SCORE:' + messageList[i].score + '</dt></dl>'
+                }
+                $('#con_detail .all_scores').html(innerHTml);
+            }
+            function sendMessage() {
+                var msg = $('#score').html();
+
+                if (msg.length > 0) {
+                    $.ajax({
+                        url: SEND_MESSAGE_SERVICE,
+                        type: 'POST',
+                        dataType: 'json',
+                        contentType: "application/json; charset=utf-8",
+                        data: JSON.stringify({ name: 'game', score: parseInt('#score').val }),
+                        success: onGetMessageSuccess, //Returns the list of messages 
+                        error: onAjaxError
+                    });
+                } 
+            }
+			
+		</script>
+</body>
+</html>
